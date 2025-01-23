@@ -37,6 +37,7 @@ export default function AddMedicine({ onAdd }: AddMedicineProps) {
 			time,
 			taken: false,
 			userId: user.id,
+			notificationSent: false, // Add the notificationSent property
 		};
 
 		try {

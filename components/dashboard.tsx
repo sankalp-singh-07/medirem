@@ -27,7 +27,6 @@ export default function Dashboard() {
 	}, [user]);
 
 	const handleAddMedicine = () => {
-		// Refresh the medicine list when a new medicine is added
 		const fetchMedicines = async () => {
 			if (!user?.id) return;
 			try {

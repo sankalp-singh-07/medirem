@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore';
 
 export interface Medicine {
+	notificationSent: any;
 	id: string;
 	name: string;
 	dosage: string;
@@ -51,4 +52,56 @@ export const updateMedicineInDB = async (
 	console.log('Updating Firestore document:', id, updatedFields); // Debug log
 	await updateDoc(medicineDoc, updatedFields);
 	console.log('Firestore update completed.'); // Debug log
+};
+
+export const getMedicinesCloseToTime = async (
+	userId: string
+): Promise<any[]> => {
+	const medicineCollection = collection(db, 'medicines');
+	const q = query(medicineCollection, where('userId', '==', userId));
+
+	const snapshot = await getDocs(q);
+	const currentTime = new Date();
+
+	const medicines = snapshot.docs.map((doc) => ({
+		id: doc.id,
+		...doc.data(),
+	})) as Medicine[];
+
+	// Filter medicines that are within 10 minutes of the current time
+	return medicines.filter((medicine) => {
+		const [hours, minutes] = medicine.time.split(':').map(Number);
+		const medicineTime = new Date();
+		medicineTime.setHours(hours, minutes, 0, 0);
+
+		const timeDifference = Math.abs(
+			medicineTime.getTime() - currentTime.getTime()
+		);
+		const TEN_MINUTES_IN_MS = 10 * 60 * 1000;
+
+		// Ensure notifications are sent only once
+		return (
+			timeDifference <= TEN_MINUTES_IN_MS && !medicine.notificationSent
+		);
+	});
+};
+
+export const markNotificationSent = async (medicineId: string) => {
+	const medicineDoc = doc(db, 'medicines', medicineId);
+	await updateDoc(medicineDoc, { notificationSent: true });
+};
+
+export const addPatientToDB = async (doctorId: string, patient: any) => {
+	const patientCollection = collection(db, 'patients');
+	await addDoc(patientCollection, { ...patient, doctorId });
+};
+
+// Get all patients for a specific doctor
+export const getPatientsForDoctor = async (doctorId: string) => {
+	const q = query(
+		collection(db, 'patients'),
+		where('doctorId', '==', doctorId)
+	);
+	const snapshot = await getDocs(q);
+	return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
