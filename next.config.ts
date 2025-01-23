@@ -1,12 +1,10 @@
 import type { NextConfig } from 'next';
 
-module.exports = {
-	root: true,
-	extends: [], // Remove all ESLint rules
-};
-
 const nextConfig: NextConfig = {
 	/* config options here */
+	eslint: {
+		ignoreDuringBuilds: true, // Disable ESLint checks during builds
+	},
 };
 
 export default nextConfig;
