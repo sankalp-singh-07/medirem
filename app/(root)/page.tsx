@@ -1,14 +1,12 @@
-import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/nextjs';
+import Header from '@/components/header';
+import Dashboard from '@/components/dashboard';
 
-export default function Dashboard() {
+export default function HomePage() {
 	return (
-		<>
-			<SignedIn>
-				<h1>Welcome to your Dashboard!</h1>
-			</SignedIn>
-			<SignedOut>
-				<RedirectToSignIn />
-			</SignedOut>
-		</>
+		<div className="min-h-screen flex flex-col">
+			<Header />
+
+			<Dashboard />
+		</div>
 	);
 }
