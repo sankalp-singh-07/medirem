@@ -12,13 +12,21 @@ import {
 } from 'firebase/firestore';
 
 export interface Medicine {
-	notificationSent: any;
+	notificationSent: boolean; // Explicitly define as boolean
 	id: string;
 	name: string;
 	dosage: string;
-	time: string; // Add the time property here
+	time: string;
 	taken: boolean;
 	userId: string;
+}
+
+export interface Patient {
+	id: string;
+	name: string;
+	email: string;
+	authId: string;
+	doctorId: string;
 }
 
 export const getMedicinesFromDB = async (
@@ -56,7 +64,7 @@ export const updateMedicineInDB = async (
 
 export const getMedicinesCloseToTime = async (
 	userId: string
-): Promise<any[]> => {
+): Promise<Medicine[]> => {
 	const medicineCollection = collection(db, 'medicines');
 	const q = query(medicineCollection, where('userId', '==', userId));
 
@@ -69,6 +77,8 @@ export const getMedicinesCloseToTime = async (
 	})) as Medicine[];
 
 	// Filter medicines that are within 10 minutes of the current time
+	const TEN_MINUTES_IN_MS = 10 * 60 * 1000;
+
 	return medicines.filter((medicine) => {
 		const [hours, minutes] = medicine.time.split(':').map(Number);
 		const medicineTime = new Date();
@@ -77,9 +87,7 @@ export const getMedicinesCloseToTime = async (
 		const timeDifference = Math.abs(
 			medicineTime.getTime() - currentTime.getTime()
 		);
-		const TEN_MINUTES_IN_MS = 10 * 60 * 1000;
 
-		// Ensure notifications are sent only once
 		return (
 			timeDifference <= TEN_MINUTES_IN_MS && !medicine.notificationSent
 		);
